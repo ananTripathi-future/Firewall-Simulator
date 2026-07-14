@@ -2,6 +2,8 @@
 
 A real-time rule-based network traffic filtering system that inspects incoming packets (IP, ports, protocols), evaluates them against user-defined prioritized rules, and provides a premium Glassmorphic dashboard showing what gets allowed/blocked and why.
 
+![Firewall Simulator Dashboard](screenshot.png)
+
 ## Directory Structure
 
 ```text
