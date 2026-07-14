@@ -1,0 +1,14 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Firewall exports
+exports/logs.json
+exports/logs.csv
+
+# IDEs
+.vscode/
+.idea/
+.system_generated/

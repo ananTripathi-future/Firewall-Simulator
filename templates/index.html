@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIREWALL SIMULATION // Real-Time Traffic Sentry & Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Local Chart.js Library -->
+    <script src="{{ url_for('static', filename='chart.js') }}"></script>
+    
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Background overlay for grid pattern -->
+    <div class="grid-overlay"></div>
+
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="dashboard-header">
+            <div class="header-logo">
+                <div class="logo-shield">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>FIREWALL SIMULATION</h1>
+                    <p>REAL-TIME TRAFFIC SENTRY</p>
+                </div>
+            </div>
+            
+            <div class="header-controls">
+                <!-- Status indicator -->
+                <div class="status-indicator" id="statusIndicator">
+                    <span class="status-pulse"></span>
+                    <span class="status-text" id="statusText">Initializing...</span>
+                </div>
+                
+                <!-- Simulation / Live Mode Toggle Switch -->
+                <div class="mode-switch-container">
+                    <span class="mode-label">Mode:</span>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="modeToggle">
+                        <label for="modeToggle" class="toggle-slider">
+                            <span class="slider-text simulation">SIM</span>
+                            <span class="slider-text live">LIVE</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT GRID -->
+        <main class="dashboard-grid">
+            
+            <!-- ROW 1: STATS CARDS -->
+            <section class="stats-row">
+                <!-- Card 1: Total Traffic -->
+                <div class="stat-card total-card">
+                    <div class="card-glow"></div>
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-network-wired"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Packets</h3>
+                        <div class="stat-value" id="statTotal">0</div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Allowed Traffic -->
+                <div class="stat-card allowed-card">
+                    <div class="card-glow"></div>
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Allowed</h3>
+                        <div class="stat-value" id="statAllowed">0</div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Blocked Traffic -->
+                <div class="stat-card blocked-card">
+                    <div class="card-glow"></div>
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-ban"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Blocked</h3>
+                        <div class="stat-value" id="statBlocked">0</div>
+                    </div>
+                </div>
+
+                <!-- Card 4: Block Rate -->
+                <div class="stat-card rate-card">
+                    <div class="card-glow"></div>
+                    <div class="stat-icon">
+                        <i class="fa-solid fa-percent"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Block Rate</h3>
+                        <div class="stat-value" id="statRate">0.0%</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ROW 2: VISUALIZATION CHARTS -->
+            <section class="charts-row">
+                <!-- Chart 1: Traffic Overview -->
+                <div class="glass-panel chart-panel">
+                    <div class="panel-header">
+                        <h2><i class="fa-solid fa-chart-pie"></i> Traffic Security Ratio</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="ratioChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Block Reason Distribution -->
+                <div class="glass-panel chart-panel">
+                    <div class="panel-header">
+                        <h2><i class="fa-solid fa-circle-exclamation"></i> Threat Vectors (Block Reasons)</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="reasonChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 3: Live Protocol Load -->
+                <div class="glass-panel chart-panel">
+                    <div class="panel-header">
+                        <h2><i class="fa-solid fa-chart-line"></i> Real-Time Protocol Load</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="protocolChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ROW 3: DETAILED TABLES (Traffic Logs and Rules Manager) -->
+            <section class="details-row">
+                
+                <!-- Left Panel: Live Traffic Ticker (60% width) -->
+                <div class="glass-panel logs-panel">
+                    <div class="panel-header flex-header">
+                        <div class="title-with-icon">
+                            <i class="fa-solid fa-terminal"></i>
+                            <h2>Live Firewall Traffic Feed</h2>
+                        </div>
+                        <div class="header-actions">
+                            <button id="clearLogsBtn" class="cyber-btn btn-secondary">
+                                <i class="fa-solid fa-trash-can"></i> Clear Stream
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Search and Filters Bar -->
+                    <div class="table-filters">
+                        <div class="filter-item">
+                            <label for="filterSrcIp">Source IP</label>
+                            <input type="text" id="filterSrcIp" placeholder="e.g. 192.168.1.*">
+                        </div>
+                        <div class="filter-item">
+                            <label for="filterDstIp">Dest IP</label>
+                            <input type="text" id="filterDstIp" placeholder="e.g. 10.0.0.*">
+                        </div>
+                        <div class="filter-item">
+                            <label for="filterProto">Protocol</label>
+                            <select id="filterProto">
+                                <option value="ALL">ALL</option>
+                                <option value="TCP">TCP</option>
+                                <option value="UDP">UDP</option>
+                                <option value="ICMP">ICMP</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label for="filterPort">Port</label>
+                            <input type="text" id="filterPort" placeholder="e.g. 443">
+                        </div>
+                        <div class="filter-item">
+                            <label for="filterAction">Action</label>
+                            <select id="filterAction">
+                                <option value="ALL">ALL</option>
+                                <option value="ALLOW">ALLOW</option>
+                                <option value="BLOCK">BLOCK</option>
+                            </select>
+                        </div>
+                        <button id="resetFiltersBtn" class="cyber-btn btn-secondary" title="Reset Filters">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="logs-table-container">
+                        <table class="cyber-table">
+                            <thead>
+                                <tr>
+                                    <th width="10%">Time</th>
+                                    <th width="10%">Proto</th>
+                                    <th width="30%">Source</th>
+                                    <th width="30%">Destination</th>
+                                    <th width="10%">Status</th>
+                                    <th width="10%">Size</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTableBody">
+                                <!-- Dynamic packet elements inserted here -->
+                                <tr id="noTrafficRow">
+                                    <td colspan="6" class="table-placeholder">
+                                        <i class="fa-solid fa-circle-notch fa-spin"></i> Awaiting packet transmissions...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Rules Manager & Creator (40% width) -->
+                <div class="glass-panel rules-panel">
+                    <div class="panel-header flex-header">
+                        <div class="title-with-icon">
+                            <i class="fa-solid fa-gears"></i>
+                            <h2>Filtering Rule Base</h2>
+                        </div>
+                        <button id="addRuleToggle" class="cyber-btn btn-primary">
+                            <i class="fa-solid fa-plus"></i> New Rule
+                        </button>
+                    </div>
+
+                    <!-- Add Rule Drawer/Modal (Glass overlay) -->
+                    <div id="ruleDrawer" class="rule-drawer hidden">
+                        <form id="addRuleForm" class="rule-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="src_ip">Source IP / CIDR</label>
+                                    <input type="text" id="src_ip" placeholder="e.g. 192.168.1.1 or *" required value="*">
+                                </div>
+                                <div class="form-group">
+                                    <label for="dst_ip">Destination IP / CIDR</label>
+                                    <input type="text" id="dst_ip" placeholder="e.g. 192.168.1.100 or *" required value="*">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="src_port">Source Port</label>
+                                    <input type="text" id="src_port" placeholder="e.g. 80 or *" required value="*">
+                                </div>
+                                <div class="form-group">
+                                    <label for="dst_port">Destination Port</label>
+                                    <input type="text" id="dst_port" placeholder="e.g. 22 or *" required value="*">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="protocol">Protocol</label>
+                                    <select id="protocol">
+                                        <option value="*">* (ANY)</option>
+                                        <option value="TCP">TCP</option>
+                                        <option value="UDP">UDP</option>
+                                        <option value="ICMP">ICMP</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="action">Action Policy</label>
+                                    <select id="action">
+                                        <option value="BLOCK">BLOCK</option>
+                                        <option value="ALLOW">ALLOW</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="priority">Rule Priority (Higher Evaluated First)</label>
+                                    <input type="number" id="priority" value="50" min="1" max="1000" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="reason">Block Reason / Memo</label>
+                                    <input type="text" id="reason" placeholder="e.g. Block unauthorized port access" required>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" id="cancelRuleBtn" class="cyber-btn btn-secondary">Cancel</button>
+                                <button type="submit" class="cyber-btn btn-primary">Apply Rule</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="rules-list-container">
+                        <div class="rules-list" id="rulesList">
+                            <!-- Rule cards injected dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- How It Works Pipeline Overview -->
+                    <div class="how-it-works-box">
+                        <h3><i class="fa-solid fa-circle-nodes"></i> Firewall Pipeline Logic</h3>
+                        <div class="pipeline-steps">
+                            <div class="step">
+                                <div class="step-num">1</div>
+                                <div class="step-desc"><strong>Sniff:</strong> Capture packet layers via Scapy / Simulation.</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-num">2</div>
+                                <div class="step-desc"><strong>Inspect:</strong> Compare IP, Port, and Protocol against active rules.</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-num">3</div>
+                                <div class="step-desc"><strong>Action:</strong> Categorize packet as <span>ALLOW</span> or <span>BLOCK</span>.</div>
+                            </div>
+                            <div class="step">
+                                <div class="step-num">4</div>
+                                <div class="step-desc"><strong>Stream:</strong> Send telemetry real-time to Flask dashboard logs.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="dashboard-footer">
+            <p>FIREWALL SIMULATION Engine v1.0.0 // Developed with Python Flask, Scapy, Chart.js & Vanilla CSS Glassmorphism</p>
+        </footer>
+    </div>
+
+    <!-- Wireshark-Style Packet Details Drawer (Slide-out) -->
+    <div id="packetDrawer" class="packet-drawer hidden">
+        <div class="packet-drawer-header">
+            <h2><i class="fa-solid fa-microscope"></i> Wireshark Packet Inspector</h2>
+            <button id="closePacketDrawer" class="close-btn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="packet-drawer-body">
+            <!-- Frame Header Details -->
+            <div class="inspector-section active-sec" id="frameSec">
+                <div class="inspector-title"><i class="fa-solid fa-caret-down"></i> Frame Metadata (General Info)</div>
+                <div class="inspector-content">
+                    <div class="detail-row"><span>Packet ID:</span> <strong id="inspectId">N/A</strong></div>
+                    <div class="detail-row"><span>Time Stamp:</span> <span id="inspectTime">N/A</span></div>
+                    <div class="detail-row"><span>Total Length:</span> <span id="inspectLen">N/A</span></div>
+                    <div class="detail-row"><span>Action Policy:</span> <span id="inspectAction">N/A</span></div>
+                </div>
+            </div>
+
+            <!-- Internet Protocol Details -->
+            <div class="inspector-section active-sec" id="ipSec">
+                <div class="inspector-title"><i class="fa-solid fa-caret-down"></i> Internet Protocol Version 4 (IPv4)</div>
+                <div class="inspector-content">
+                    <div class="detail-row"><span>Source IP:</span> <strong id="inspectSrcIP">N/A</strong></div>
+                    <div class="detail-row"><span>Destination IP:</span> <strong id="inspectDstIP">N/A</strong></div>
+                    <div class="detail-row"><span>Time to Live (TTL):</span> <span id="inspectTTL">N/A</span></div>
+                    <div class="detail-row"><span>Protocol Layer:</span> <span id="inspectProtocol" class="proto-badge">N/A</span></div>
+                </div>
+            </div>
+
+            <!-- Transmission Control Protocol details -->
+            <div class="inspector-section active-sec" id="layer4Sec">
+                <div class="inspector-title" id="layer4Title"><i class="fa-solid fa-caret-down"></i> Transmission Control Protocol (TCP)</div>
+                <div class="inspector-content">
+                    <div class="detail-row" id="srcPortRow"><span>Source Port:</span> <span id="inspectSrcPort">N/A</span></div>
+                    <div class="detail-row" id="dstPortRow"><span>Destination Port:</span> <span id="inspectDstPort">N/A</span></div>
+                    <div class="detail-row" id="flagsRow"><span>Control Flags:</span> <strong id="inspectFlags">N/A</strong></div>
+                </div>
+            </div>
+
+            <!-- Firewall Rule Match -->
+            <div class="inspector-section active-sec" id="firewallSec">
+                <div class="inspector-title"><i class="fa-solid fa-caret-down"></i> Sentry Firewall Inspection</div>
+                <div class="inspector-content">
+                    <div class="detail-row"><span>Matched Rule ID:</span> <span id="inspectMatchedRule">N/A</span></div>
+                    <div class="detail-row"><span>Evaluation Verdict:</span> <span id="inspectVerdict">N/A</span></div>
+                    <div class="detail-row"><span>Block / Pass Reason:</span> <strong id="inspectReason">N/A</strong></div>
+                </div>
+            </div>
+
+            <!-- Hex Dump Display (Wireshark-like) -->
+            <div class="inspector-section active-sec" id="hexSec">
+                <div class="inspector-title"><i class="fa-solid fa-caret-down"></i> Reconstructed Payload Hex Dump</div>
+                <pre class="hex-dump-terminal" id="inspectHexDump">
+0000   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+                </pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Toast Notification -->
+    <div id="toastNotification" class="toast-notification hidden">
+        <div class="toast-content">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span id="toastMessage">An error occurred.</span>
+        </div>
+        <button id="toastClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Custom Script -->
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+</html>

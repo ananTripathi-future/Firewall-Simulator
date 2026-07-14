@@ -1,0 +1,50 @@
+[
+    {
+        "id": "rule_1",
+        "priority": 100,
+        "src_ip": "198.51.100.5",
+        "dst_ip": "*",
+        "src_port": "*",
+        "dst_port": "22",
+        "protocol": "TCP",
+        "action": "BLOCK",
+        "reason": "Known malicious SSH brute-forcer",
+        "enabled": true
+    },
+    {
+        "id": "rule_2",
+        "priority": 90,
+        "src_ip": "192.168.1.0/24",
+        "dst_ip": "*",
+        "src_port": "*",
+        "dst_port": "3389",
+        "protocol": "TCP",
+        "action": "BLOCK",
+        "reason": "Block RDP from local subnet",
+        "enabled": true
+    },
+    {
+        "id": "rule_3",
+        "priority": 50,
+        "src_ip": "*",
+        "dst_ip": "*",
+        "src_port": "*",
+        "dst_port": "*",
+        "protocol": "ICMP",
+        "action": "BLOCK",
+        "reason": "Ping sweep mitigation",
+        "enabled": true
+    },
+    {
+        "id": "rule_4",
+        "priority": 20,
+        "src_ip": "203.0.113.12",
+        "dst_ip": "*",
+        "src_port": "*",
+        "dst_port": "80",
+        "protocol": "TCP",
+        "action": "BLOCK",
+        "reason": "Suspected DDoS botnet IP",
+        "enabled": true
+    }
+]
