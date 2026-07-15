@@ -1,63 +1,302 @@
-# Firewall-Simulator
+# 🛡️ Sentry Firewall Simulator
 
-A real-time rule-based network traffic filtering system that inspects incoming packets (IP, ports, protocols), evaluates them against user-defined prioritized rules, and provides a premium Glassmorphic dashboard showing what gets allowed/blocked and why.
+A real-time **Rule-Based Firewall Simulator** and **Network Traffic Analyzer** built using **Python, Flask, Scapy, and Chart.js**.
 
-## Directory Structure
+Sentry monitors live or simulated network traffic, inspects packets based on configurable firewall rules, and visualizes the results through an interactive dashboard. It demonstrates how packet filtering, rule evaluation, and traffic monitoring work in modern firewall systems.
+
+---
+
+# 📸 Dashboard Preview
+
+> **Coming Soon**
+
+Add screenshots after completing the project.
+
+- 🖥️ Dashboard Overview
+- 📊 Live Charts
+- 📜 Traffic Log
+- 🔍 Packet Inspector
+- ⚙️ Rule Manager
+
+---
+
+# ✨ Features
+
+## 🌐 Live & Simulated Traffic
+
+- Capture real network traffic using **Scapy**
+- Simulation mode for demonstrations
+- Automatic fallback if live capture is unavailable
+- Supports TCP, UDP, and ICMP packets
+
+---
+
+## 🛡 Rule-Based Firewall Engine
+
+The firewall evaluates packets using the following fields:
+
+- Source IP Address
+- Destination IP Address
+- Source Port
+- Destination Port
+- Protocol
+
+Features include:
+
+- Priority-based rule matching
+- CIDR subnet support
+- Custom block reasons
+- Allow/Block actions
+- Hot rule reloading
+- Dynamic rule management
+
+---
+
+## 🔎 Packet Inspection
+
+Click any packet to inspect:
+
+- Packet ID
+- Timestamp
+- Source & Destination IP
+- Source & Destination Port
+- Protocol
+- TCP Flags
+- TTL
+- Packet Size
+- Hex Dump
+- ASCII Payload
+
+---
+
+## 📊 Live Dashboard
+
+Real-time monitoring with:
+
+- Total Packets
+- Allowed Packets
+- Blocked Packets
+- Block Rate
+- Protocol Distribution
+- Threat Reason Statistics
+- Live Packet Feed
+
+Built with:
+
+- Flask
+- Server-Sent Events (SSE)
+- Chart.js
+
+---
+
+## 📝 Logging
+
+Every processed packet is logged.
+
+Supported exports:
+
+- CSV
+- JSON
+
+Logs include:
+
+- Timestamp
+- Packet ID
+- Source IP
+- Destination IP
+- Protocol
+- Firewall Action
+- Rule ID
+- Block Reason
+
+---
+
+# 🏗 System Architecture
+
+```text
+                   +----------------------+
+                   | Live Traffic         |
+                   |      OR              |
+                   | Simulation Engine    |
+                   +----------+-----------+
+                              |
+                              ▼
+                     Packet Sniffer (Scapy)
+                              |
+                              ▼
+                      Packet Parser Layer
+                              |
+                              ▼
+                  Rule Evaluation Engine
+                              |
+             +----------------+----------------+
+             |                                 |
+          Allowed                           Blocked
+             |                                 |
+             +----------------+----------------+
+                              |
+                              ▼
+                       Logging Engine
+                              |
+                              ▼
+                    Flask REST API + SSE
+                              |
+                              ▼
+                    Interactive Dashboard
+```
+
+---
+
+# 📂 Project Structure
 
 ```text
 Firewall-Simulator/
-│
-├── app.py
-├── config.py
-├── rules.json
+
+├── app.py                  # Flask application
+├── config.py               # Configuration settings
+├── rules.json              # Firewall rules
 ├── requirements.txt
-│
+
 ├── engine/
-│      filter_engine.py
-│      rule_manager.py
-│      logger.py
-│
+│   ├── filter_engine.py    # Rule evaluation engine
+│   ├── rule_manager.py     # Rule CRUD operations
+│   └── logger.py           # Logging utilities
+
 ├── network/
-│      packet_sniffer.py
-│      packet_generator.py
-│      packet_parser.py
-│
+│   ├── packet_sniffer.py   # Live packet capture
+│   ├── packet_generator.py # Simulation engine
+│   └── packet_parser.py    # Packet parsing
+
 ├── static/
-│      style.css
-│      dashboard.js
-│      chart.js
-│
+│   ├── style.css
+│   ├── dashboard.js
+│   └── chart.js
+
 ├── templates/
-│      index.html
-│
+│   └── index.html
+
 ├── exports/
-│      logs.csv
-│      logs.json
-│
+│   ├── logs.csv
+│   └── logs.json
+
 ├── tests/
-│      test_filter.py
-│
+│   └── test_filter.py
+
 └── README.md
 ```
 
-## Getting Started
+---
 
-1. **Install Dependencies**:
-   Ensure you have Python installed, then run:
-   ```bash
-   pip install -r requirements.txt
-   ```
+# ⚙️ How It Works
 
-2. **Run the Application**:
-   Execute the Flask server from the root directory:
-   ```bash
-   python app.py
-   ```
-   Open your browser and load:
-   [http://127.0.0.1:5000](http://127.0.0.1:5000)
+1. Network packets are captured using **Scapy** or generated by the simulation engine.
+2. Packet headers are parsed.
+3. The firewall compares packet attributes against configured rules.
+4. The first matching rule determines whether the packet is **Allowed** or **Blocked**.
+5. Every decision is logged.
+6. The Flask server streams updates to the dashboard in real time using **Server-Sent Events (SSE)**.
 
-3. **Running Tests**:
-   To verify the filter engine logic (IP subnets, protocol parsing, rule priority orders):
-   ```bash
-   python -m unittest tests/test_filter.py
-   ```
+---
+
+# 🚀 Installation
+
+Clone the repository
+
+```bash
+git clone https://github.com/ananTripathi-future/Firewall-Simulator.git
+```
+
+Move into the project directory
+
+```bash
+cd Firewall-Simulator
+```
+
+Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+# ▶️ Running the Project
+
+Start the Flask server
+
+```bash
+python app.py
+```
+
+Open your browser
+
+```
+http://127.0.0.1:5000
+```
+
+---
+
+# 🧪 Running Tests
+
+```bash
+python -m unittest tests/test_filter.py
+```
+
+---
+
+# 💻 Technologies Used
+
+| Technology | Purpose |
+|------------|---------|
+| Python | Backend Development |
+| Flask | Web Framework |
+| Scapy | Packet Sniffing |
+| Chart.js | Live Data Visualization |
+| HTML5 | Dashboard UI |
+| CSS3 | Styling |
+| JavaScript | Frontend Logic |
+| JSON | Rule Storage |
+
+---
+
+# 📌 Future Enhancements
+
+- Stateful Firewall
+- Intrusion Detection System (IDS)
+- GeoIP Lookup
+- Threat Intelligence Integration
+- SQLite Database Support
+- User Authentication
+- Docker Deployment
+- REST API Documentation
+
+---
+
+# 📖 Learning Objectives
+
+This project demonstrates practical concepts in:
+
+- Computer Networks
+- Network Security
+- Firewall Design
+- Packet Filtering
+- Deep Packet Inspection
+- Python Backend Development
+- Real-Time Web Applications
+- Data Visualization
+
+---
+
+# 📜 License
+
+This project is licensed under the MIT License.
+
+---
+
+# 👨💻 Author
+
+**Anant Tripathi**
+
+B.Tech Computer Science & Engineering
+
+Cybersecurity | Artificial Intelligence | Network Security
