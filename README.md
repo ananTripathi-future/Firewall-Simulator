@@ -8,15 +8,7 @@ Sentry monitors live or simulated network traffic, inspects packets based on con
 
 # 📸 Dashboard Preview
 
-> **Coming Soon**
-
-Add screenshots after completing the project.
-
-- 🖥️ Dashboard Overview
-- 📊 Live Charts
-- 📜 Traffic Log
-- 🔍 Packet Inspector
-- ⚙️ Rule Manager
+![Dashboard Preview](screenshot.png)
 
 ---
 
